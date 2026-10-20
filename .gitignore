@@ -1,0 +1,5 @@
+node_modules/
+.sfx/
+test/shots/
+test/last-run.log
+WITCH-PROGRESS.md

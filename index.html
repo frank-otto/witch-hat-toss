@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Witch Hat Toss – a cinematic 3D Halloween game</title>
+<meta name="description" content="Toss witch hats onto pumpkins, grave spikes, brooms, a scarecrow and drifting ghosts under a giant Halloween moon. Real 3D flight with arc, spin and wind, streaks, special hats, six levels, a duel mode and a kids mode.">
+<meta name="theme-color" content="#05060f">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%A7%99%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-state="intro">
+<canvas id="game" aria-label="Witch Hat Toss game"></canvas>
+<div id="flash"></div>
+<div id="pops"></div>
+<div id="banner"></div>
+<div id="hud">
+  <div class="chip big" id="hScoreBox"><small data-t="scoreL">Score</small><b id="hScore">0</b></div>
+  <div class="chip" id="hLvlBox"><small id="hLvlL">Level 1</small><b id="hLvl"></b><i class="bar"><u id="hGoal"></u></i></div>
+  <div class="chip" id="hHatsBox"><small data-t="hatsL">Hats</small><b id="hHats"></b></div>
+  <div class="chip hot" id="hComboBox" style="display:none"><b id="hCombo"></b></div>
+</div>
+<div id="duelBar"><span id="dP1"></span><span id="dTurn"></span><span id="dP2"></span></div>
+<div id="side"><div class="chip" id="nextBox"></div><div class="chip" id="windBox"><small data-t="windL">Wind</small><b id="windV"></b><i id="windA">➜</i></div></div>
+<div id="power"><i id="powerFill"></i></div>
+<div id="hint"></div>
+<div id="top">
+  <button id="btnQuit" class="pill" aria-label="Finish">✕</button>
+  <button id="btnQ" class="pill">⚙</button>
+  <button id="btnSound" class="pill on" aria-label="Sound">🔊</button>
+  <button id="btnLang" class="pill">DE</button>
+</div>
+<div id="toast"></div>
+<div id="opening"><div id="oTitle"><span class="w1">WITCH HAT</span><span class="w2">TOSS</span></div><div id="oSub">8 days to Halloween 🎃</div></div>
+<button id="btnSkip" class="pill" data-t="skip">Skip ▸</button>
+<button id="btnTapSound" class="pill" data-t="tapSound">🔊 Tap for sound</button>
+<section id="menu" class="panel">
+  <h1><span class="fl">🧙</span> Witch Hat Toss</h1>
+  <p class="sub" data-t="sub"></p>
+  <button id="btnCampaign" class="big"><span data-t="campaign"></span><small data-t="campaignSub"></small><em id="bestCampaign"></em></button>
+  <button id="btnDuel" class="big alt"><span data-t="duel"></span><small data-t="duelSub"></small></button>
+  <div id="diff" role="group"><button data-d="easy" data-t="easy"></button><button data-d="medium" data-t="medium"></button><button data-d="hard" data-t="hard"></button></div>
+  <div class="row"><button id="btnKids" class="toggle" aria-pressed="false"><i></i><span data-t="kidsMode"></span></button><button id="btnIntro" class="pill" data-t="intro"></button></div>
+  <p class="tip kidsTip" data-t="kidsHint"></p>
+  <p class="tip keys" id="keysTip"></p>
+  <p class="tip" data-t="credit"></p>
+</section>
+<section id="end" class="panel">
+  <h2 id="eTitle"></h2>
+  <div id="eRank" class="rank"></div>
+  <div id="eScore" class="score">0</div>
+  <div id="eBest" class="best"></div>
+  <div id="eStats" class="stats"></div>
+  <label class="name"><span data-t="yourName">Name on the card</span><input id="eName" maxlength="18" value="Player 1" autocomplete="off"></label>
+  <div class="row"><button id="btnCard" data-t="card"></button><button id="btnShare" data-t="share"></button></div>
+  <div class="row"><button id="btnAgain" class="big" data-t="again"></button><button id="btnMenu" data-t="menu"></button></div>
+</section>
+<script src="js/sounds-src.js"></script>
+<script src="js/game.bundle.js"></script>
+</body>
+</html>
