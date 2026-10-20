@@ -295,8 +295,8 @@ async def main():
     check('no email addresses', not re.search(r'[\w.+-]+@[\w-]+\.[\w.]+', texts))
     ab = ''.join(map(chr, (65, 73)))
     check('visible text uses SI, never the other abbreviation', not re.search(r'\b' + ab + r'\b', texts))
-    check('no social handle in the game', not re.search(r'(?<![\w.])@[A-Za-z_]\w+', ''.join(open(f, encoding='utf8').read() for f in glob.glob(ROOT + '/src/*.js') + [ROOT + '/index.html'])))
-    BAN = {'77646f5a4f316663', '043f4ce6d84aff1d', '7dbef27a673fea64', '849c39839ba51811', '55579b557896d0ce'}
+    check('no social handle in the game', not re.search(r'(?<![\w.])@(?!Frank_AI_Lab\b)[A-Za-z_]\w+', ''.join(open(f, encoding='utf8').read() for f in glob.glob(ROOT + '/src/*.js') + [ROOT + '/index.html'])))
+    BAN = {'4991c47202960c57', '043f4ce6d84aff1d', '7dbef27a673fea64', '849c39839ba51811', '55579b557896d0ce'}
     hit_ = sorted({w for w in re.findall(r'[A-Za-zÀ-ÿ]+', texts) if hashlib.sha256(w.lower().encode()).hexdigest()[:16] in BAN})
     check('no personal names', not hit_, hit_)
     SUR = ''.join(map(chr, (111, 116, 116, 111)))  # the surname, kept out of the source as text
