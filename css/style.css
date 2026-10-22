@@ -70,7 +70,7 @@ body[data-state=intro] #btnSkip { display: block; } #btnSkip:active { transform:
 
 /* ================= START SCREEN: ONE TAP TO PLAY =================
    Full-screen and transparent: title on top, the moonlit field behind, ONE big glowing PLAY in the thumb zone.
-   Duel, difficulty, kids mode, quality and the intro replay live in the "Levels & options" sheet. */
+   Duel, difficulty, kids mode, quality and the intro replay live in the "Modes & options" sheet. */
 .kicker { font-size: 12px; letter-spacing: .3em; text-transform: uppercase; color: #ffb35a; text-shadow: 0 0 14px rgba(255, 140, 40, .5), 0 2px 6px rgba(0, 0, 0, .9); }
 .lab { font-size: 10.5px; letter-spacing: .24em; text-transform: uppercase; opacity: .6; margin: 14px 0 6px; }
 body #menu { left: 0; top: 0; right: 0; bottom: 0; width: auto; height: 100%; max-height: none; transform: none; border: 0; border-radius: 0; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; overflow: hidden; touch-action: none;

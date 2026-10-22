@@ -42,7 +42,7 @@ async def hit(pg, i, err=0, n=75):
     await ready(pg); ok = await pg.evaluate(f'__wh.aimAt({i}, {err})'); await settle(pg, n); return ok
 BLACK = '''(n) => { const gl = __wh.renderer.getContext(), px = new Uint8Array(4); let k = 0; for (let i = 0; i < n; i++) { __wh.step(1/30); let lit = 0; for (const [fx, fy] of [[.5, .5], [.25, .3], [.75, .3], [.25, .75], [.75, .75]]) { gl.readPixels(Math.floor(gl.drawingBufferWidth * fx), Math.floor(gl.drawingBufferHeight * fy), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); if (px[0] + px[1] + px[2] >= 3) lit++; } if (!lit) k++; } return k; }'''
 
-async def opt(pg, sel):  # options live in the "Levels & options" sheet
+async def opt(pg, sel):  # options live in the "Modes & options" sheet
     if not await pg.evaluate("document.body.dataset.more === '1'"): await pg.click('#btnMore')
     await pg.click(sel)
 async def close_opt(pg):
@@ -77,6 +77,7 @@ async def main():
         check('start screen: title, ONE big PLAY (campaign · medium), options button', 'WITCH HAT' in await pg.text_content('#menu h1') and 'Play' in await pg.text_content('#btnPlay') and 'Campaign · Medium' in await pg.text_content('#playL') and await pg.is_visible('#btnMore') and not await pg.is_visible('#more'))
         hid = await pg.evaluate("['#btnDuel', '#diff', '#btnKids', '#btnIntro', '#btnQ2'].filter(s => { const e = document.querySelector(s); const r = e.getBoundingClientRect(); return getComputedStyle(e).visibility !== 'hidden' && r.width > 0 && document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2) === e; })")
         check('start screen: duel / difficulty / kids / intro / quality are tucked into the sheet', not hid, hid)
+        check('options button + sheet title read "Modes & options"', (await pg.text_content('#btnMore')).strip() == '⚙ Modes & options' and await pg.text_content('#moreT') == 'Modes & options', await pg.text_content('#btnMore'))
         await pg.click('#btnMore'); await pg.evaluate('__wh.step(1/30, 2)'); await shot(pg, 'shot-options.png')
         check('options sheet opens with duel, difficulty, kids, quality, intro', await pg.is_visible('#more.show') and all([await pg.is_visible(x) for x in ('#btnDuel', '#diff', '#btnKids', '#btnQ2', '#btnIntro')]))
         check("graphics label reads 'Normal · Auto' by default", 'Normal · Auto' in await pg.text_content('#btnQ2'), await pg.text_content('#btnQ2'))
@@ -97,7 +98,7 @@ async def main():
         check('menu: demo hats sit on the targets', await pg.evaluate('__wh.targets().reduce((a, t) => a + t.stack, 0)') >= 2)
         check('language: starts in the browser language (en-US → English)', await pg.evaluate('document.documentElement.lang') == 'en')
         await pg.click('#btnLang'); de = await pg.text_content('#btnPlay'); await shot(pg, 'shot-menu-de.png')
-        check('DE toggle', 'Spielen' in de and 'Kampagne' in await pg.text_content('#playL') and 'Duell' in await pg.text_content('#btnDuel'), de)
+        check('DE toggle', (await pg.text_content('#btnMore')).strip() == '⚙ Modi & Optionen' and 'Spielen' in de and 'Kampagne' in await pg.text_content('#playL') and 'Duell' in await pg.text_content('#btnDuel'), de)
         await pg.wait_for_timeout(200); await pg.reload(wait_until='load'); await pg.wait_for_function('document.body.classList.contains("ready") && window.__wh')
         check('language choice remembered after reload (beats the browser language)', 'Spielen' in await pg.text_content('#btnPlay')); await pg.evaluate('__wh.endIntro(); __wh.step(1/30, 2)'); await pg.click('#btnLang')
         check('difficulty default Medium', await pg.evaluate('__wh.S.diff') == 'medium' and 'on' in (await pg.get_attribute('#diff [data-d=medium]', 'class') or ''))

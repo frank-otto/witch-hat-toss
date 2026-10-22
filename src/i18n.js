@@ -1,7 +1,7 @@
 export const T = {
   en: {
     countdown: '8 days to Halloween 🎃', tagline: 'Toss witch hats onto pumpkins, spikes, brooms and ghosts under the giant Halloween moon – mind the wind!',
-    play: 'Play', more: '⚙ Levels & options', moreT: 'Levels & options', diffL: 'Difficulty', tapPlay: '👆 Tap anywhere to play', clickPlay: '▶ Click anywhere to play', auto: 'Auto', quality: 'Graphics',
+    play: 'Play', more: '⚙ Modes & options', moreT: 'Modes & options', diffL: 'Difficulty', tapPlay: '👆 Tap anywhere to play', clickPlay: '▶ Click anywhere to play', auto: 'Auto', quality: 'Graphics',
     duel: '👥 Duel', duelSub: 'Player 1 vs Player 2 – take turns on one device.',
     easy: 'Easy', medium: 'Medium', hard: 'Hard', kidsMode: 'Kids mode', kidsHint: 'Kids mode: huge catch zones, the full flight path, no wind and no game over.',
     keysHint: 'Drag back from anywhere and let go to toss. Or aim with ← → / ↑ ↓ and press Space.', keysHintT: 'Pull back anywhere on the screen and let go to toss the hat.',
@@ -19,7 +19,7 @@ export const T = {
   },
   de: {
     countdown: 'Noch 8 Tage bis Halloween 🎃', tagline: 'Wirf Hexenhüte auf Kürbisse, Grabspitzen, Besen und Geister unter dem riesigen Halloween-Mond – achte auf den Wind!',
-    play: 'Spielen', more: '⚙ Level & Optionen', moreT: 'Level & Optionen', diffL: 'Schwierigkeit', tapPlay: '👆 Irgendwo tippen zum Spielen', clickPlay: '▶ Irgendwo klicken zum Spielen', auto: 'Auto', quality: 'Grafik',
+    play: 'Spielen', more: '⚙ Modi & Optionen', moreT: 'Modi & Optionen', diffL: 'Schwierigkeit', tapPlay: '👆 Irgendwo tippen zum Spielen', clickPlay: '▶ Irgendwo klicken zum Spielen', auto: 'Auto', quality: 'Grafik',
     duel: '👥 Duell', duelSub: 'Spieler 1 gegen Spieler 2 – abwechselnd an einem Gerät.',
     easy: 'Leicht', medium: 'Mittel', hard: 'Schwer', kidsMode: 'Kindermodus', kidsHint: 'Kindermodus: riesige Fangzonen, die ganze Flugbahn, kein Wind und kein Game Over.',
     keysHint: 'Irgendwo zurückziehen und loslassen zum Werfen. Oder mit ← → / ↑ ↓ zielen und Leertaste drücken.', keysHintT: 'Irgendwo auf dem Bildschirm zurückziehen und loslassen, um den Hut zu werfen.',

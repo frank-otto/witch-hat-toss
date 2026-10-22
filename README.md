@@ -17,7 +17,7 @@ Midnight under a giant full moon. A witch races across the sky and flings her ha
 **Duel:** Player 1 vs Player 2, taking turns on one device, three rounds.
 **Difficulty:** Easy / Medium / Hard. **Kids mode:** huge catch zones, the full flight path with a landing ring, no wind, unlimited hats, no game over.
 
-The game opens with a cinematic intro – **one tap or click anywhere** jumps straight into the campaign (sound starts on that same tap). The start screen has one big **PLAY** button; duel, difficulty, kids mode, graphics and the intro replay are in **⚙ Levels & options**. English / German (starts in your browser language, remembers your choice), a 1080×1350 share card, quality levels (Normal by default, auto step-down only if the frame rate stays low).
+The game opens with a cinematic intro – **one tap or click anywhere** jumps straight into the campaign (sound starts on that same tap). The start screen has one big **PLAY** button; duel, difficulty, kids mode, graphics and the intro replay are in **⚙ Modes & options**. English / German (starts in your browser language, remembers your choice), a 1080×1350 share card, quality levels (Normal by default, auto step-down only if the frame rate stays low).
 
 ## Tech
 - Three.js (WebGL): moonlit field with sky shader (stars, drifting clouds, blood moon, witch lights), billboard moon with halo and god rays, moon-light shadows, fog, fireflies, jack-o'-lanterns, a witch's cottage with chimney smoke, a bubbling cauldron, bloom.

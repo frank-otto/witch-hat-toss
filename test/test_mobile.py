@@ -88,6 +88,7 @@ async def run(p, eng, dev, land, loc):
     OF = "[...document.querySelectorAll('#menu button, #menu button *, #more button, #more button *, #menu h1 span, #menu .kicker, #btnSkip')].filter(e => e.getBoundingClientRect().width > 0).filter(e => e.scrollWidth > e.clientWidth + 2 || e.getBoundingClientRect().right > innerWidth + 1 || e.getBoundingClientRect().left < -1).map(e => e.id || e.className || e.tagName)"
     of = await ev(pg, OF); check(f'{T} German: no text overflows its button or the screen (start screen)', not of, of)
     await pg.tap('#btnMore'); await pg.wait_for_timeout(900); await pg.screenshot(path=f'{OUT}{tag}-3-options-de.png')
+    check(f'{T} German labels: "⚙ Modi & Optionen" button and sheet title', (await ev(pg, "document.getElementById('btnMore').textContent")).strip() == '⚙ Modi & Optionen' and await ev(pg, "document.getElementById('moreT').textContent") == 'Modi & Optionen')
     sh = await ev(pg, "(() => { const m = document.getElementById('more'); return [m.classList.contains('show'), m.scrollHeight > m.clientHeight + 1]; })()")
     sel = ['#btnMoreX', '#btnDuel', '#diff button[data-d=easy]', '#diff button[data-d=medium]', '#diff button[data-d=hard]', '#btnKids', '#btnQ2', '#btnIntro']
     bad, h = await hits(pg, sel); of = await ev(pg, OF)
