@@ -36,8 +36,8 @@ body:not([data-state=play]) #banner { visibility: hidden; }
   background: linear-gradient(160deg, rgba(30,20,48,.84), rgba(6,6,16,.92)); border: 1px solid rgba(220,180,255,.22); border-radius: 26px; box-shadow: 0 20px 60px rgba(0,0,0,.6), 0 0 40px rgba(140,80,255,.12);
   opacity: 0; pointer-events: none; transition: opacity .45s, transform .45s; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
 .panel.show { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
-@media (min-width: 820px) and (min-aspect-ratio: 1/1) { #menu, #end { left: auto; right: 4vw; transform: translate(0, -46%) scale(.96); } #menu.show, #end.show { transform: translate(0, -50%) scale(1); } }
-@media (max-aspect-ratio: 85/100) { #menu, #end { top: auto; bottom: max(10px, env(safe-area-inset-bottom)); transform: translate(-50%, 4%) scale(.96); max-height: 66vh; } #menu.show, #end.show { transform: translate(-50%, 0) scale(1); } }
+@media (min-width: 820px) and (min-aspect-ratio: 1/1) { #end { left: auto; right: 4vw; transform: translate(0, -46%) scale(.96); } #end.show { transform: translate(0, -50%) scale(1); } }
+@media (max-aspect-ratio: 85/100) { #end { top: auto; bottom: max(10px, env(safe-area-inset-bottom)); transform: translate(-50%, 4%) scale(.96); max-height: 74vh; } #end.show { transform: translate(-50%, 0) scale(1); } }
 h1 { margin: 2px 0 6px; font-size: 34px; color: #ffe2a8; text-shadow: 0 0 22px rgba(255,160,60,.45), 0 3px 0 #2a1440; } h1 .fl { display: inline-block; animation: bob 2.4s ease-in-out infinite; } @keyframes bob { 50% { transform: translateY(-4px) rotate(-6deg); } }
 h2 { margin: 2px 0 4px; font-size: 30px; color: #ffe2a8; }
 .sub { margin: 0 0 12px; font-size: 15px; opacity: .88; line-height: 1.35; }
@@ -61,7 +61,81 @@ button.big:active, button:active { transform: translateY(2px); }
   -webkit-text-stroke: 2px rgba(60,20,8,.55); filter: drop-shadow(0 0 22px rgba(255,150,40,.65)) drop-shadow(0 6px 0 rgba(30,8,40,.9)); }
 #oTitle .w1 { font-size: min(15vw, 22vh); } #oTitle .w2 { font-size: min(22vw, 32vh); }
 #oSub { margin-top: 3vh; font-size: min(6vw, 5.4vh); font-weight: 700; color: #ffb35a; opacity: 0; text-shadow: 0 0 18px rgba(255,140,40,.7), 0 3px 0 #2a1406; }
-#btnSkip, #btnTapSound { position: fixed; z-index: 8; display: none; } body[data-state=intro] #btnSkip { display: block; right: 12px; bottom: calc(max(12px, env(safe-area-inset-bottom)) + 4px); }
-body[data-state=intro][data-audio=locked] #btnTapSound { display: block; left: 12px; bottom: calc(max(12px, env(safe-area-inset-bottom)) + 4px); animation: pulse 1.2s ease-in-out infinite; } @keyframes pulse { 50% { transform: scale(1.08); } }
+#btnSkip { position: fixed; z-index: 8; display: none; left: 50%; bottom: calc(max(18px, env(safe-area-inset-bottom)) + 7vh); transform: translateX(-50%); white-space: nowrap; min-height: 48px; padding: 13px 26px; font-size: 18px; font-weight: 600; letter-spacing: .04em;
+  border: 1.5px solid rgba(255, 220, 160, .7); background: linear-gradient(180deg, rgba(255, 160, 70, .5), rgba(150, 60, 220, .5)); box-shadow: 0 0 30px rgba(255, 130, 60, .45); animation: tapGlow 1.4s ease-in-out infinite alternate; }
+body[data-state=intro] #btnSkip { display: block; } #btnSkip:active { transform: translateX(-50%) scale(.96); }
+@keyframes tapGlow { from { box-shadow: 0 0 14px rgba(255, 130, 60, .3); opacity: .82; } to { box-shadow: 0 0 36px rgba(255, 130, 60, .7); opacity: 1; } }
 
 @media (max-aspect-ratio: 3/4) { #banner { top: 31%; } }
+
+/* ================= START SCREEN: ONE TAP TO PLAY =================
+   Full-screen and transparent: title on top, the moonlit field behind, ONE big glowing PLAY in the thumb zone.
+   Duel, difficulty, kids mode, quality and the intro replay live in the "Levels & options" sheet. */
+.kicker { font-size: 12px; letter-spacing: .3em; text-transform: uppercase; color: #ffb35a; text-shadow: 0 0 14px rgba(255, 140, 40, .5), 0 2px 6px rgba(0, 0, 0, .9); }
+.lab { font-size: 10.5px; letter-spacing: .24em; text-transform: uppercase; opacity: .6; margin: 14px 0 6px; }
+body #menu { left: 0; top: 0; right: 0; bottom: 0; width: auto; height: 100%; max-height: none; transform: none; border: 0; border-radius: 0; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; overflow: hidden; touch-action: none;
+  padding: calc(max(12px, env(safe-area-inset-top)) + 52px) max(16px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  display: flex; flex-direction: column; align-items: center; justify-content: space-between; text-align: center; pointer-events: none;
+  background: linear-gradient(180deg, rgba(4, 4, 14, .6) 0%, rgba(4, 4, 14, 0) 34%, rgba(4, 4, 14, 0) 54%, rgba(4, 4, 14, .74) 100%); }
+body #menu.show { transform: none; pointer-events: none; }
+body #menu > * { pointer-events: none; } body #menu.show .mPlay > * { pointer-events: auto; } body[data-more="1"] #menu.show .mPlay > * { pointer-events: none; }
+#menu .mTop { max-width: 640px; } #menu .kicker { margin-bottom: 8px; }
+body #menu h1 { margin: 0; line-height: .88; color: transparent; text-shadow: none; } body #menu h1 span { display: block; letter-spacing: .04em;
+  background: linear-gradient(180deg, #fff6cf 0%, #ffd36a 38%, #e6801e 62%, #fff0b0 100%); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0 18px rgba(255, 150, 40, .5)) drop-shadow(0 4px 0 rgba(30, 8, 40, .9)); }
+body #menu h1 .w1 { font-size: clamp(40px, 12vw, 92px); } body #menu h1 .w2 { font-size: clamp(54px, 17vw, 128px); }
+#menu .sub { margin: 12px auto 0; max-width: 32ch; font-size: 15px; opacity: .9; text-shadow: 0 2px 10px rgba(0, 0, 0, .95); }
+#menu .mPlay { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; margin-bottom: 5vh; }
+#btnPlay.play { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; width: min(84vw, 380px); min-height: 84px; padding: 12px 26px; border-radius: 999px;
+  border: 2px solid rgba(255, 236, 190, .9); background: linear-gradient(180deg, #ffe08a 0%, #ffa043 42%, #b45cff 100%); color: #1e0a2c; cursor: pointer;
+  font-size: 34px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; text-shadow: 0 1px 0 rgba(255, 255, 255, .45);
+  box-shadow: 0 0 0 6px rgba(255, 150, 60, .16), 0 0 40px rgba(255, 140, 60, .6), 0 14px 34px rgba(90, 30, 160, .5), inset 0 2px 0 rgba(255, 255, 255, .65), inset 0 -8px 16px rgba(90, 30, 160, .35);
+  animation: playGlow 1.6s ease-in-out infinite alternate; transition: filter .2s; }
+#btnPlay.play:hover { filter: brightness(1.08) saturate(1.1); } #btnPlay.play:active { filter: brightness(.95); transform: none; }
+#btnPlay.play::after { content: ''; position: absolute; inset: 3px 18% auto; height: 38%; border-radius: 999px; background: linear-gradient(180deg, rgba(255, 255, 255, .55), rgba(255, 255, 255, 0)); pointer-events: none; }
+#btnPlay .pl { line-height: 1; } #btnPlay em { display: block; font-style: normal; font-size: 13px; letter-spacing: .04em; text-transform: none; font-weight: 600; color: #2a0f3a; opacity: .85; margin-top: 4px; text-shadow: none; white-space: nowrap; }
+@keyframes playGlow { from { box-shadow: 0 0 0 4px rgba(255, 150, 60, .12), 0 0 26px rgba(255, 140, 60, .45), 0 14px 34px rgba(90, 30, 160, .45), inset 0 2px 0 rgba(255, 255, 255, .65), inset 0 -8px 16px rgba(90, 30, 160, .35); }
+  to { box-shadow: 0 0 0 9px rgba(255, 150, 60, .2), 0 0 58px rgba(255, 150, 60, .8), 0 14px 34px rgba(90, 30, 160, .5), inset 0 2px 0 rgba(255, 255, 255, .7), inset 0 -8px 16px rgba(90, 30, 160, .35); } }
+#btnMore.ghost { padding: 10px 18px; min-height: 44px; border-radius: 999px; border: 1px solid rgba(230, 220, 255, .25); background: rgba(8, 8, 22, .6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); font-size: 15px; font-weight: 600; }
+#btnMore.ghost:hover { background: rgba(40, 30, 70, .75); }
+#menu .credit { margin: 2px 0 0; text-shadow: 0 1px 6px rgba(0, 0, 0, .9); }
+/* the options sheet */
+#moreBg { position: fixed; inset: 0; z-index: 9; background: rgba(3, 2, 10, .55); opacity: 0; pointer-events: none; transition: opacity .3s; }
+body[data-more="1"][data-state=menu] #moreBg { opacity: 1; pointer-events: auto; }
+body[data-state=menu] #top { z-index: 11; }
+body:not([data-state=play]) #btnQ { display: none; } /* quality: auto, manual switch in the sheet */
+#more { z-index: 10; left: 50%; top: 50%; transform: translate(-50%, -47%) scale(.98); width: min(440px, 94vw); max-height: min(92vh, 760px); overflow: auto; padding: 16px 20px 16px; }
+#more.show { transform: translate(-50%, -50%); }
+#more .sheetHead { display: flex; align-items: center; justify-content: space-between; gap: 10px; } #more .sheetHead b { font-size: 18px; letter-spacing: .03em; color: #ffe2a8; }
+#more .sheetHead .pill { width: 44px; height: 44px; padding: 0; font-size: 16px; }
+#more .big { margin: 12px 0 4px; }
+#more .row { margin: 8px 0 0; } #more .row > button.opt { min-height: 44px; font-size: 15px; }
+#more .toggle { width: 100%; min-height: 44px; justify-content: center; border: 1px solid rgba(220, 200, 255, .25); border-radius: 14px; background: rgba(255, 255, 255, .06); }
+#diff { margin: 0; } #diff button { min-height: 44px; }
+#more .tip { margin: 8px 0 0; }
+@media (max-aspect-ratio: 17/20) {
+  #more { left: 0; right: 0; top: auto; bottom: 0; width: 100%; transform: translateY(30px); border-radius: 22px 22px 0 0; border-bottom: 0; max-height: calc(100% - max(12px, env(safe-area-inset-top)) - 8px);
+    padding: 14px max(16px, env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
+  #more.show { transform: none; }
+}
+@media (max-height: 700px) { #more .how { display: none; } }
+@media (max-height: 620px) and (max-aspect-ratio: 17/20) { #more .big small { display: none; } #more .lab { margin: 10px 0 5px; } #menu .sub { font-size: 14px; } #btnPlay.play { min-height: 76px; } }
+@media (max-height: 560px) { #menu .sub { display: none; } #menu .mPlay { margin-bottom: 0; } }
+/* phone landscape / short screens */
+@media (max-height: 520px) and (min-aspect-ratio: 1/1) {
+  body #menu { padding-top: calc(max(8px, env(safe-area-inset-top)) + 10px); }
+  body #menu h1 .w1 { font-size: 32px; } body #menu h1 .w2 { font-size: 46px; } #menu .kicker { margin-bottom: 4px; font-size: 11px; }
+  #btnPlay.play { min-height: 64px; font-size: 26px; width: min(60vw, 340px); } #menu .mPlay { gap: 6px; }
+  #more { max-height: calc(100% - 16px); width: min(700px, 96vw); display: grid; grid-template-columns: 1fr 1fr; column-gap: 18px; align-content: start; padding: 12px 18px 12px; }
+  #more > * { grid-column: 2; } #more > .sheetHead { grid-column: 1 / 3; } #more > #btnDuel, #more > .how, #more > .kidsTip { grid-column: 1; }
+  #more > #btnDuel { grid-row: 2 / 4; align-self: start; } #more > .how { grid-row: 4 / 6; } #more > .kidsTip { grid-row: 6; }
+  #more > .labDiff { grid-row: 2; } #more > #diff { grid-row: 3; } #more > .rowKids { grid-row: 4; } #more > .rowOpt { grid-row: 5; }
+  #more .lab { margin: 6px 0 5px; } #more .big { margin: 6px 0 0; padding: 9px 14px; } #more .how { display: block; }
+}
+@media (max-height: 380px) and (min-aspect-ratio: 1/1) { #more .how, #more .kidsTip { display: none !important; } #menu .credit { display: none; } }
+body[data-more="1"][data-state=menu] #top { visibility: hidden; } /* the sheet has its own ✕; nothing may sit on top of it */
+/* finger-sized touch targets everywhere */
+#top .pill { min-width: 44px; min-height: 44px; } .panel .row > button, #end .row > button { min-height: 44px; } button.big { min-height: 52px; }
+/* WebKit (iOS Safari) can still paint backdrop-filter children of an opacity:0 parent → really hide what is hidden */
+body:not([data-state=play]) #hud, body:not([data-state=play]) #side, body:not([data-state=play]) #duelBar, body:not([data-state=play]) #hint, body:not([data-state=play]) #power { visibility: hidden; }
+.panel:not(.show) { visibility: hidden; } body[data-more="1"] #menu { opacity: 0; visibility: hidden; }
+#toast:not(.show) { visibility: hidden; } body[data-state=intro] #top { visibility: hidden; }

@@ -56,7 +56,7 @@ export const TARGETS = {
 let PM = null;
 export function makeTarget(kind, seed = 1, W) { const r = rnd(seed); const g = new THREE.Group(); const T = { kind, g, stack: [], seat: 0, tip: 0, bodies: [], pts: TARGETS[kind].pts, tol: TARGETS[kind].tol, ph: r() * 6.28 };
   const sh = o => { o.traverse(m => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } }); return o; };
-  if (kind === 'pumpkin') { PM = PM || pumpkinMats(5); const s = .55 + r() * .1; const m = PM.body.clone(); m.emissiveIntensity = 1.2; const b = new THREE.Mesh(pumpkinGeo(30), m); b.scale.set(s * 1.08, s, s * 1.08); b.position.y = s * .72; g.add(sh(b)); T.face = m;
+  if (kind === 'pumpkin') { if (!PM) { PM = pumpkinMats(5); Object.values(PM).forEach(m => m.userData.keep = true); } const s = .55 + r() * .1; const m = PM.body.clone(); m.emissiveIntensity = 1.2; const b = new THREE.Mesh(pumpkinGeo(30), m); b.scale.set(s * 1.08, s, s * 1.08); b.position.y = s * .72; g.add(sh(b)); T.face = m;
     const st = new THREE.Mesh(new THREE.CylinderGeometry(.05, .08, .26, 7), PM.stem); st.position.y = s * 1.44 + .1; st.rotation.z = .15; g.add(sh(st));
     const gl = new THREE.PointLight('#ff8a30', 2.5, 4, 1.8); gl.position.set(0, s * .7, s * 1.2); g.add(gl); T.light = gl;
     T.seat = s * 1.42; T.tip = s * 1.44 + .22; T.bodies.push([s * .72, s * 1.05]); T.h = s * 1.5; }
@@ -72,7 +72,7 @@ export function makeTarget(kind, seed = 1, W) { const r = rnd(seed); const g = n
   else if (kind === 'scarecrow') { const wood = W.mats.woodM; const post = new THREE.Mesh(new THREE.BoxGeometry(.12, 2.3, .12), wood); post.position.y = 1.15; g.add(sh(post)); const bar = new THREE.Mesh(new THREE.BoxGeometry(1.7, .1, .1), wood); bar.position.y = 1.85; g.add(sh(bar));
     const shirt = new THREE.MeshStandardMaterial({ map: tex(clothTexture(seed, '6a4a30')), roughness: 1 }); const body = new THREE.Mesh(new THREE.CylinderGeometry(.26, .34, .9, 10), shirt); body.position.y = 1.55; g.add(sh(body));
     for (const sx of [-1, 1]) { const arm = new THREE.Mesh(new THREE.CylinderGeometry(.09, .11, .7, 8), shirt); arm.rotation.z = Math.PI / 2; arm.position.set(sx * .55, 1.85, 0); g.add(sh(arm)); const straw = new THREE.Mesh(new THREE.ConeGeometry(.1, .25, 7, 1, true), W.mats.hayM); straw.rotation.z = sx * Math.PI / 2; straw.position.set(sx * .98, 1.85, 0); g.add(straw); }
-    const sack = new THREE.MeshStandardMaterial({ map: tex(clothTexture(seed + 5, 'a8885a')), roughness: 1, emissive: '#ff7a1a', emissiveIntensity: 0 }); const head = new THREE.Mesh(new THREE.SphereGeometry(.22, 16, 12), sack); head.position.y = 2.3; head.scale.y = 1.08; g.add(sh(head)); T.headMat = sack;
+    const sack = new THREE.MeshStandardMaterial({ map: tex(clothTexture(seed + 5, 'a8885a')), roughness: 1, emissive: '#ff7a1a', emissiveIntensity: 0 }); const head = new THREE.Mesh(new THREE.SphereGeometry(.22, 16, 12), sack); head.position.y = 2.3; head.scale.y = 1.08; g.add(sh(head)); T.headMat = sack; T.own = [shirt.map, sack.map];
     const eyeM = new THREE.MeshBasicMaterial({ color: '#ffb040' }); for (const sx of [-1, 1]) { const e = new THREE.Mesh(new THREE.SphereGeometry(.035, 6, 4), eyeM); e.position.set(sx * .08, 2.34, .2); g.add(e); }
     T.seat = 2.42; T.tip = 2.55; T.bodies.push([1.55, .34], [2.3, .22], [1.85, .3]); T.h = 2.6; }
   else if (kind === 'ghost') { const pts = []; for (let i = 0; i <= 20; i++) { const k = i / 20; const y = 1 - k; const rr = k < .35 ? Math.sin(k / .35 * Math.PI / 2) * .32 : .32 + (k - .35) * .25; pts.push(new THREE.Vector2(Math.max(.001, rr), y * 1.15)); }

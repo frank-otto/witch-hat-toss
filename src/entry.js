@@ -57,7 +57,7 @@ function applyQuality(qn, user) {
   S.q = qn; if (user) { S.qUser = true; ls.set('wh-q', qn); } const q = QUALITY[qn];
   renderer.shadowMap.enabled = q.shadows; W.key.castShadow = q.shadows; if (q.shadows) { W.key.shadow.mapSize.set(q.shadowSize, q.shadowSize); if (W.key.shadow.map) { W.key.shadow.map.dispose(); W.key.shadow.map = null; } }
   scene.traverse(o => { if (o.material) (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => m.needsUpdate = true); });
-  buildComposer(); resize(); $('btnQ').textContent = '⚙ ' + t('q_' + qn);
+  buildComposer(); resize(); $('btnQ').textContent = '⚙ ' + t('q_' + qn); if ($('btnQ2')) $('btnQ2').textContent = `⚙ ${t('q_' + qn)}${S.qUser ? '' : ' · ' + t('auto')}`;
 }
 let VW = 1, VH = 1; const portrait = () => VW / VH < .85, wide = () => VW >= 820 && VW >= VH;
 function resize() { VW = window.innerWidth; VH = window.innerHeight; const dpr = Math.min(window.devicePixelRatio || 1, QUALITY[S.q].dpr);
@@ -65,10 +65,14 @@ function resize() { VW = window.innerWidth; VH = window.innerHeight; const dpr =
 
 // ---------------- targets / level layout ----------------
 const targets = []; const flying = []; let hand = null, handKind = 'normal', queue = [];
-function clearTargets() { for (const T0 of targets) { scene.remove(T0.g); T0.g.traverse(o => { if (o.geometry) o.geometry.dispose(); }); } targets.length = 0; }
+// free every target's own GPU resources when a level is rebuilt (shared world/pumpkin/hat materials and cached label textures are kept)
+function clearTargets() { const keep = new Set(Object.values(W.mats));
+  for (const T0 of targets) { for (const H of T0.stack) H.g.parent && H.g.parent.remove(H.g); scene.remove(T0.g);
+    T0.g.traverse(o => { if (o.geometry && !o.isSprite) o.geometry.dispose(); if (o.material) (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => { if (!keep.has(m) && !m.userData.keep) m.dispose(); }); });
+    (T0.own || []).forEach(x => x.dispose()); } targets.length = 0; }
 function levelDef(i) { if (S.mode === 'duel') return LEVELS[i % 3]; return i < LEVELS.length ? LEVELS[i] : LEVELS[3 + ((i - LEVELS.length) % 3)]; }
 const MARK_COL = { pumpkin: '#ffa040', spike: '#9ab8ff', broom: '#c890ff', scarecrow: '#ffe070', ghost: '#7af0ff' };
-function labelTex(txt, col) { const c = document.createElement('canvas'); c.width = 256; c.height = 96; const g = c.getContext('2d'); g.font = '700 64px Fredoka, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineWidth = 10; g.strokeStyle = 'rgba(10,6,24,.85)'; g.strokeText(txt, 128, 50); g.fillStyle = col; g.fillText(txt, 128, 50); const tx = new THREE.CanvasTexture(c); tx.colorSpace = THREE.SRGBColorSpace; return tx; }
+const _labels = {}; function labelTex(txt, col) { const key = txt + col; if (_labels[key]) return _labels[key]; const c = document.createElement('canvas'); c.width = 256; c.height = 96; const g = c.getContext('2d'); g.font = '700 64px Fredoka, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineWidth = 10; g.strokeStyle = 'rgba(10,6,24,.85)'; g.strokeText(txt, 128, 50); g.fillStyle = col; g.fillText(txt, 128, 50); const tx = new THREE.CanvasTexture(c); tx.colorSpace = THREE.SRGBColorSpace; return (_labels[key] = tx); }
 function addMarker(T0) { const col = MARK_COL[T0.kind]; const m = new THREE.Mesh(new THREE.RingGeometry(.62, .78, 48), new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: .5, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, fog: false })); m.rotation.x = -Math.PI / 2; m.position.y = .03; T0.g.add(m); T0.ring = m;
   const lab = new THREE.Sprite(new THREE.SpriteMaterial({ map: labelTex('+' + T0.pts, col), transparent: true, depthWrite: false, fog: false })); lab.scale.set(1.1, .41, 1); lab.position.y = T0.tip + (T0.inner ? 1.2 : 0) + .55; T0.g.add(lab); T0.label = lab; }
 function buildLevel(i) { clearTargets(); const L = levelDef(i); L.t.forEach(([k, x, z], j) => { const T0 = makeTarget(k, 100 + i * 17 + j * 5, W); T0.x0 = x; T0.z0 = z; T0.g.position.set(x, 0, z); addMarker(T0); scene.add(T0.g); targets.push(T0); });
@@ -172,8 +176,8 @@ const timers = []; function setTimer(d, f) { timers.push({ t: S.gt + d, f }); } 
 const music = new Player();
 function clearHats() { for (const H of flying) scene.remove(H.g); flying.length = 0; if (hand) { scene.remove(hand.g); hand = null; } for (const T0 of targets) { for (const H of T0.stack) H.g.parent && H.g.parent.remove(H.g); T0.stack.length = 0; } queue = []; for (const r of rings) { scene.remove(r.m); r.m.geometry.dispose(); r.m.material.dispose(); } rings.length = 0; rockets.length = 0; }
 function resetRun() { clearTimers(); clearHats(); S.score = 0; S.lvlScore = 0; S.level = 0; S.streak = 0; S.bestStreak = 0; S.ringers = 0; S.perfects = 0; S.thrown = 0; S.ms = 0; S.wind = 0; S.windBase = 0; S.gust = null; S.lvlDone = false; S.end = ''; S.newBest = false; S.duel = [0, 0]; S.player = 0; S.pstreak = [0, 0]; S.bloodT = null; S.auroraT = null; W.blood = 0; W.aurora = 0; S.aimYaw = 0; S.aimPow = .5; S.kbAim = false; S.aiming = false; }
-function start(mode) { A.unlock(); resetRun(); S.mode = mode; S.state = 'play'; window.__banners = []; $('end').classList.remove('show'); $('menu').classList.remove('show'); music.start('game', S.gt + .3); music.vol = .85; A.sfx.stinger();
-  beginLevel(0); $('hint').textContent = t(isTouch ? 'hintT' : 'hint'); setTimer(1.2, () => $('hint').classList.add('show')); setTimer(9, () => $('hint').classList.remove('show')); setUI(); }
+function start(mode) { A.unlock(); resetRun(); S.mode = mode; S.state = 'play'; S.more = false; window.__banners = []; $('end').classList.remove('show'); $('menu').classList.remove('show'); music.start('game', S.gt + .3); music.vol = .85; A.sfx.stinger();
+  beginLevel(0); $('hint').textContent = t(isTouch ? 'hintT' : 'hint'); setTimer(.6, () => $('hint').classList.add('show')); setTimer(6.5, () => $('hint').classList.remove('show')); setUI(); }
 function beginLevel(i) { S.level = i; buildLevel(i); S.lvlDone = false; S.hats = D().hats; S.duelHats = [DUEL_HATS, DUEL_HATS]; S.player = 0; S.lvlT = S.gt; if (hand) { scene.remove(hand.g); hand = null; } S.nextHandAt = S.gt + .8;
   banner(levelTitle(i)); A.sfx.levelStart(); setUI(); }
 function levelTitle(i) { const n = i < LEVELS.length || S.mode === 'duel' ? `L${(S.mode === 'duel' ? i % 3 : i) + 1}` : `L${4 + ((i - LEVELS.length) % 3)}`; return `${S.mode === 'duel' ? t('round') : t('levelL')} ${i + 1} · ${t(n)}${i >= LEVELS.length && S.mode !== 'duel' ? ' · ' + t('encore') : ''}`; }
@@ -192,7 +196,7 @@ function endRun(why) { if (S.state === 'end' || S.state === 'menu') return; S.st
   $('eStats').innerHTML = `<span>${t('reached')}: <b>${S.level + 1}</b></span><span>${t('ringers')}: <b>${S.ringers}/${S.thrown}</b></span><span>${t('perfects')}: <b>${S.perfects}</b></span><span>${t('comboL')}: <b>×${S.bestStreak}</b></span>`;
   $('eName').value = S.name; $('end').classList.add('show'); setUI(); A.sfx.win(); }
 const rankOf = s => s < 400 ? 0 : s < 1200 ? 1 : s < 2500 ? 2 : s < 4500 ? 3 : s < 7000 ? 4 : 5;
-function toMenu() { resetRun(); S.state = 'menu'; $('menu').classList.add('show'); $('end').classList.remove('show'); music.start('menu', S.gt + .4); music.vol = .8; buildLevel(2); demoHats(); applyLang(); setUI(); }
+function toMenu() { resetRun(); S.state = 'menu'; S.more = false; $('menu').classList.add('show'); $('end').classList.remove('show'); music.start('menu', S.gt + .4); music.vol = .8; buildLevel(2); demoHats(); applyLang(); setUI(); }
 function demoHats() { targets.forEach((T0, i) => { if (i % 2 === 0 || T0.kind === 'scarecrow') { const H = makeHat(i === 1 ? 'golden' : 'normal', i); H.idx = 0; H.spin = 0; H.state = 'on'; H.target = T0; (T0.inner || T0.g).add(H.g); H.g.position.set(0, T0.seat, 0); H.g.rotation.y = i; T0.stack.push(H); } }); }
 
 // ---------------- the cinematic opening ----------------
@@ -234,7 +238,7 @@ function introStep() { const e = S.gt - S.introT0; S.introT = e;
   return { pos, look, fov }; }
 
 // ---------------- UI ----------------
-function setUI() { const st = S.state; document.body.dataset.state = st; document.body.dataset.mode = S.mode; document.body.dataset.kids = S.kids ? '1' : '0';
+function setUI() { const st = S.state; document.body.dataset.state = st; const more = !!S.more && st === 'menu'; document.body.dataset.more = more ? '1' : '0'; $('more').classList.toggle('show', more); $('btnMore').setAttribute('aria-expanded', more); document.body.dataset.mode = S.mode; document.body.dataset.kids = S.kids ? '1' : '0';
   $('hScore').textContent = S.mode === 'duel' ? S.duel[S.player] : S.score; $('hCombo').textContent = S.streak >= 2 ? `🔥 ×${S.streak}${comboMult(S.streak) > 1 ? '  ·  x' + comboMult(S.streak) : ''}` : ''; $('hComboBox').style.display = S.streak >= 2 ? '' : 'none';
   $('hLvlL').textContent = `${S.mode === 'duel' ? t('round') : t('levelL')} ${S.level + 1}`; $('hLvl').textContent = S.mode === 'duel' ? `${t('round')} ${S.level + 1}/${DUEL_LEVELS}` : `${t('goalL')} ${Math.min(S.lvlScore, S.goal || 0)}/${S.goal || 0}`; $('hGoal').style.width = S.mode === 'duel' ? `${(S.level + 1) / DUEL_LEVELS * 100}%` : `${clamp(S.lvlScore / (S.goal || 1), 0, 1) * 100}%`;
   const hatsLeft = S.mode === 'duel' ? S.duelHats[S.player] : S.hats; $('hHats').textContent = S.kids && S.mode !== 'duel' ? '🎩 ∞' : `🎩 ×${Math.max(0, hatsLeft)}`;
@@ -243,10 +247,10 @@ function setUI() { const st = S.state; document.body.dataset.state = st; documen
 function renderNext() { const k = queue[1] || genKind(S.thrown + 1); $('nextBox').innerHTML = `<small>${t('next')}</small><span>${HAT_KINDS[k].e}</span><b>${t(k + 'C')}</b>`; }
 function renderWind() { const w = S.wind; $('windV').textContent = Math.abs(w) < .05 ? t('calm') : `${Math.abs(w).toFixed(1)}`; $('windA').style.transform = `rotate(${w < 0 ? 180 : 0}deg) scale(${(.7 + Math.min(1.2, Math.abs(w) * .35)).toFixed(2)})`; $('windA').style.opacity = Math.abs(w) < .05 ? .25 : 1; }
 function applyLang() { document.documentElement.lang = S.lang; document.querySelectorAll('[data-t]').forEach(el => el.textContent = t(el.dataset.t)); $('btnLang').textContent = S.lang === 'en' ? 'DE' : 'EN';
-  $('keysTip').textContent = t(isTouch ? 'keysHintT' : 'keysHint'); $('oSub').textContent = S.lang === 'de' ? 'Noch 8 Tage bis Halloween 🎃' : '8 days to Halloween 🎃';
+  $('keysTip').textContent = t(isTouch ? 'keysHintT' : 'keysHint'); $('btnSkip').textContent = t(isTouch ? 'tapPlay' : 'clickPlay'); $('oSub').textContent = S.lang === 'de' ? 'Noch 8 Tage bis Halloween 🎃' : '8 days to Halloween 🎃';
   $('btnKids').classList.toggle('on', S.kids); $('btnKids').setAttribute('aria-pressed', S.kids); document.querySelectorAll('#diff button').forEach(b => b.classList.toggle('on', b.dataset.d === S.diff)); $('diff').style.display = S.kids ? 'none' : '';
-  const b = +ls.get(bestKey('campaign'), 0); $('bestCampaign').textContent = b ? `🏆 ${b}` : '';
-  $('btnSound').classList.toggle('on', !A.isMuted()); $('btnSound').textContent = A.isMuted() ? '🔇' : '🔊'; $('btnQ').textContent = '⚙ ' + t('q_' + S.q); renderNext(); renderWind(); setUI(); }
+  const b = +ls.get(bestKey('campaign'), 0); $('playL').textContent = `${t('campaignT')} · ${S.kids ? t('kidsT') : t(S.diff)}${b ? ' · 🏆 ' + b : ''}`;
+  $('btnSound').classList.toggle('on', !A.isMuted()); $('btnSound').textContent = A.isMuted() ? '🔇' : '🔊'; $('btnQ').textContent = '⚙ ' + t('q_' + S.q); $('btnQ2').textContent = `⚙ ${t('q_' + S.q)}${S.qUser ? '' : ' · ' + t('auto')}`; renderNext(); renderWind(); setUI(); }
 let popQ = 0;
 const _sp = new THREE.Vector3();
 function popAt(txt, col, big, at) { (window.__pops = window.__pops || []).push(txt); let x = 0, y = 0; if (at) { _sp.copy(at).project(camera); x = clamp(_sp.x * .5 * VW, -VW * .38, VW * .38); y = clamp(-_sp.y * .5 * VH + VH * .06 - VH * .06, -VH * .3, VH * .3) - 40; }
@@ -254,14 +258,14 @@ function popAt(txt, col, big, at) { (window.__pops = window.__pops || []).push(t
   setTimeout(() => { const el = document.createElement('div'); el.className = 'pop'; el.textContent = txt; el.style.color = col; el.style.left = x + 'px'; el.style.top = (y - VH * .44 + VH * .5) + 'px'; el.style.fontSize = (28 * big * (VW < 600 ? .78 : 1)) + 'px'; $('pops').appendChild(el); setTimeout(() => el.remove(), 1400); }, delay); }
 function popText(txt, col, big = 1) { popAt(txt, col, big, null); }
 function banner(s) { (window.__banners = window.__banners || []).push(s); const el = $('banner'); el.textContent = s; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show'); }
-function toast(s) { const el = $('toast'); el.textContent = s; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2500); }
+function toast(s) { if (S.state !== 'play') return; const el = $('toast'); el.textContent = s; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2500); }
 function flashScreen(k) { const el = $('flash'); el.style.transition = 'none'; el.style.opacity = Math.min(.5, k); void el.offsetWidth; el.style.transition = 'opacity .7s ease-out'; el.style.opacity = 0; }
 
 // ---------------- input: pull back + release ----------------
 let isTouch = (() => { try { return matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0; } catch (e) { return false; } })(), drag = null;
 window.addEventListener('pointerdown', e => { if (e.pointerType === 'touch' && !isTouch) { isTouch = true; applyLang(); } }, true);
 function aimFromDrag(x, y) { const sc = Math.min(VW, VH) * .42; const dx = (x - drag.x) / sc, dy = (y - drag.y) / sc; S.aimPow = clamp(dy, 0, 1); S.aimYaw = clamp(-dx * .55, -.6, .6); $('powerFill').style.width = (S.aimPow * 100) + '%'; S.dragAmt = Math.hypot(dx, dy); }
-function unlockAudio() { const was = A.state(); A.unlock(); setTimeout(audioBadge, 60); if (S.state === 'intro' && was !== 'running' && S.introT < 5.2 && !window.__whManual) { const tryRestart = () => { if (A.state() === 'running') startIntro(); }; setTimeout(tryRestart, 80); } }
+function unlockAudio() { A.unlock(); setTimeout(audioBadge, 60); }
 function audioBadge() { document.body.dataset.audio = A.state() === 'running' ? 'on' : 'locked'; }
 canvas.addEventListener('pointerdown', e => { if (e.pointerType === 'touch' && !isTouch) { isTouch = true; applyLang(); } unlockAudio(); e.preventDefault(); if (S.state !== 'play' || !canToss()) return; drag = { x: e.clientX, y: e.clientY, id: e.pointerId }; S.aiming = true; S.kbAim = false; S.aimPow = 0; S.dragAmt = 0; try { canvas.setPointerCapture(e.pointerId); } catch (er) {} $('power').classList.add('show'); A.sfx.pick(); });
 canvas.addEventListener('pointermove', e => { if (!drag || e.pointerId !== drag.id) return; aimFromDrag(e.clientX, e.clientY); if (hand) { hand.pull = S.aimPow; } });
@@ -269,14 +273,16 @@ function endDrag(e) { if (!drag || (e && e.pointerId !== drag.id)) return; if (e
 canvas.addEventListener('pointerup', endDrag); canvas.addEventListener('pointercancel', () => { drag = null; S.aiming = false; $('power').classList.remove('show'); });
 const keys = {};
 window.addEventListener('keydown', e => { if (e.target && e.target.tagName === 'INPUT') return; unlockAudio(); const k = e.code; keys[k] = true;
-  if (S.state === 'intro' && (k === 'Escape' || k === 'Enter' || k === 'Space')) { e.preventDefault(); endIntro(); return; }
+  if (S.state === 'intro' && (k === 'Enter' || k === 'Space')) { e.preventDefault(); playNow(); return; }
+  if (S.state === 'intro' && k === 'Escape') { e.preventDefault(); endIntro(); return; }
+  if (S.state === 'menu' && S.more && k === 'Escape') { S.more = false; setUI(); return; }
   if (S.state === 'play' && (k === 'Space' || k === 'Enter') && !e.repeat) { e.preventDefault(); if (canToss()) { S.kbAim = false; toss(); } return; }
   if (S.state === 'play' && /^Arrow/.test(k)) { e.preventDefault(); S.kbAim = true; }
   if (k === 'Escape') { if (S.state === 'play') endRun('quit'); else if (S.state === 'end') toMenu(); return; }
-  if (S.state === 'menu' && k === 'Enter') start('campaign'); });
+  if (S.state === 'menu' && !S.more && k === 'Enter') start('campaign'); });
 window.addEventListener('keyup', e => { keys[e.code] = false; });
 function keyAim(dt) { if (S.state !== 'play') return; const a = (keys.ArrowLeft ? -1 : 0) + (keys.ArrowRight ? 1 : 0), p = (keys.ArrowUp ? 1 : 0) + (keys.ArrowDown ? -1 : 0); if (a) S.aimYaw = clamp(S.aimYaw + a * dt * .45, -.6, .6); if (p) S.aimPow = clamp(S.aimPow + p * dt * .5, 0, 1); }
-$('btnCampaign').onclick = () => start('campaign'); $('btnDuel').onclick = () => start('duel');
+$('btnPlay').onclick = () => start('campaign'); $('btnDuel').onclick = () => start('duel');
 $('btnAgain').onclick = () => start(S.mode); $('btnMenu').onclick = () => { A.sfx.ui(); toMenu(); };
 $('btnQuit').onclick = () => { if (S.state === 'play') endRun('quit'); else if (S.state === 'end') toMenu(); };
 $('btnCard').onclick = () => saveCard(false); $('btnShare').onclick = () => saveCard(true);
@@ -285,9 +291,16 @@ document.querySelectorAll('#diff button').forEach(b => b.onclick = () => { S.dif
 $('btnKids').onclick = () => { S.kids = !S.kids; ls.set('wh-kids', S.kids ? '1' : '0'); applyLang(); A.unlock(); A.sfx.ui(); };
 $('btnSound').onclick = () => { A.unlock(); A.setMuted(!A.isMuted()); applyLang(); };
 $('btnQ').onclick = () => { const o = ['low', 'mid', 'high', 'ultra']; applyQuality(o[(o.indexOf(S.q) + 1) % 4], true); };
-$('btnSkip').onclick = e => { e.stopPropagation(); A.unlock(); endIntro(); }; $('btnTapSound').onclick = e => { e.stopPropagation(); A.unlock(); setTimeout(() => { audioBadge(); if (A.state() === 'running' && S.state === 'intro') startIntro(); }, 80); };
-$('btnIntro').onclick = () => { A.unlock(); startIntro(); };
-$('opening').addEventListener('pointerdown', () => unlockAudio());
+// ---- ONE TAP TO PLAY: the first tap/click anywhere on the opening goes straight into the campaign (sound unlocks on that same tap) ----
+let eatClick = 0;
+function playNow() { if (S.state !== 'intro') return; A.unlock(); setTimeout(audioBadge, 60); endIntro(); start('campaign'); }
+function introTap(e) { if (S.state !== 'intro') return; if (e.pointerType === 'touch' && !isTouch) { isTouch = true; applyLang(); } eatClick = performance.now() + 450; playNow(); }
+window.addEventListener('pointerup', introTap);
+window.addEventListener('click', e => { if (performance.now() < eatClick) { e.stopPropagation(); e.preventDefault(); eatClick = 0; return; } introTap(e); }, true); // the same tap must not also hit a menu button
+for (const ev of ['touchend', 'click', 'keydown']) window.addEventListener(ev, () => A.unlock(), { capture: true, passive: true }); // iOS: resume audio inside a real user gesture
+$('btnMore').onclick = () => { S.more = true; A.unlock(); A.sfx.ui(); setUI(); }; $('btnMoreX').onclick = $('moreBg').onclick = () => { S.more = false; A.sfx.ui(); setUI(); };
+$('btnQ2').onclick = () => { $('btnQ').onclick(); applyLang(); };
+$('btnIntro').onclick = () => { A.unlock(); S.more = false; startIntro(); };
 $('eName').addEventListener('keydown', e => e.stopPropagation());
 window.addEventListener('resize', resize);
 
@@ -369,6 +382,7 @@ function fpsTick(dt) { if (document.hidden) return; fps.since += dt; if (fps.sin
 applyQuality(S.q); applyLang(); resize();
 A.unlock(); audioBadge(); setTimeout(audioBadge, 400);
 if (window.__whSkipIntro) toMenu(); else startIntro();
+window.addEventListener('pageshow', e => { if (e.persisted) audioBadge(); });
 try { renderer.compile(scene, camera); } catch (e) {}
 let last = performance.now();
 function advance(now) { const dt = Math.max(0, (now - last) / 1000) || 0; last = Math.max(last, now || 0); if (!window.__whManual) { step(dt); fpsTick(dt); } return dt; } // rAF stamps can be earlier than the last one: never run the clock backwards
